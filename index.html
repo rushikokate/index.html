@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuickParcel QR Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .qr-card { transition: all 0.3s ease; }
+        .input-group:focus-within label { color: #2563eb; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Mobile Header -->
+    <header class="bg-blue-600 text-white p-4 sticky top-0 z-50 shadow-md flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            <h1 class="font-bold text-lg">QuickParcel QR</h1>
+        </div>
+        <button onclick="resetForm()" class="text-xs bg-blue-500 px-3 py-1 rounded-full active:bg-blue-700">New Label</button>
+    </header>
+
+    <main class="p-4 max-w-md mx-auto pb-24">
+        
+        <!-- Input Form Card -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 mb-6">
+            <h2 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4 text-center">Parcel Information</h2>
+            
+            <div class="space-y-4">
+                <!-- Customer Name -->
+                <div class="input-group">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Customer Name</label>
+                    <input type="text" id="customer" placeholder="Enter name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 transition-all text-sm">
+                </div>
+
+                <!-- Complete Address -->
+                <div class="input-group">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Full Delivery Address</label>
+                    <textarea id="address" rows="2" placeholder="Street, Town, Hub..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 transition-all text-sm resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Location / Town Hub -->
+                    <div class="input-group">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Sort Hub</label>
+                        <select id="location" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 text-sm appearance-none">
+                            <option value="Town Hub X">Town Hub X</option>
+                            <option value="Town Hub Y">Town Hub Y</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="input-group">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Price ($)</label>
+                        <input type="number" id="price" placeholder="0.00" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Weight -->
+                    <div class="input-group">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Weight (kg)</label>
+                        <input type="number" id="weight" step="0.1" placeholder="1.0" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 text-sm">
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="input-group">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Payment</label>
+                        <select id="payment" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 text-sm appearance-none">
+                            <option value="Prepaid">Prepaid</option>
+                            <option value="COD">COD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="generateQR()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-transform mt-4 flex items-center justify-center gap-2">
+                    Generate QR Label
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Section (Hidden initially) -->
+        <div id="result" class="hidden animate-fade">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
+                <div id="qr-container" class="bg-white p-4 border-8 border-slate-900 rounded-2xl mb-6">
+                    <!-- QR Image will load here -->
+                </div>
+                
+                <div class="w-full bg-slate-50 p-4 rounded-2xl text-center mb-6">
+                    <p id="display-id" class="font-mono text-blue-600 font-bold mb-1"></p>
+                    <p class="text-slate-400 text-[10px] uppercase tracking-tighter">Machine Readable Tracking ID</p>
+                </div>
+
+                <button onclick="downloadQR()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:bg-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Download Label
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let currentParcelId = "";
+
+        function generateQR() {
+            const customer = document.getElementById('customer').value || "Unnamed";
+            const address = document.getElementById('address').value || "N/A";
+            const location = document.getElementById('location').value;
+            const price = document.getElementById('price').value || "0.00";
+            const weight = document.getElementById('weight').value || "0";
+            const payment = document.getElementById('payment').value;
+            
+            currentParcelId = "ID-" + Math.floor(100000 + Math.random() * 900000);
+
+            const data = {
+                id: currentParcelId,
+                cust: customer,
+                addr: address,
+                hub: location,
+                val: price,
+                wt: weight,
+                pay: payment
+            };
+
+            const qrString = JSON.stringify(data);
+            const encodedData = encodeURIComponent(qrString);
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodedData}&margin=10`;
+
+            const container = document.getElementById('qr-container');
+            container.innerHTML = `<img src="${qrUrl}" alt="QR Code" id="qr-image" class="w-56 h-56">`;
+            
+            document.getElementById('display-id').innerText = currentParcelId;
+            document.getElementById('result').classList.remove('hidden');
+            
+            // Auto scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function downloadQR() {
+            const img = document.getElementById('qr-image');
+            if (!img) return;
+
+            const response = await fetch(img.src);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Label-${currentParcelId}.png`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+            document.getElementById('result').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
